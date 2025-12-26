@@ -8,6 +8,8 @@ Route::get('/', function () {
 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/location', [AuthController::class, 'index'])->name('location');
+
 
 Route::get('/dashboard', function () {
     return view('dashboard.dashboard');
