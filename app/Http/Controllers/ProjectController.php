@@ -7,6 +7,17 @@ use App\Models\Project;
 
 class ProjectController extends Controller
 {
+    public function index()
+    {
+        // Use PPDO connection
+        $projects = \DB::connection('pgsql_ppdo')->table('projects')->get();
+
+        return response()->json([
+            'message' => 'All projects are displayed',
+            'data' => $projects
+        ]);
+    }
+
     // Store new project
     public function store(Request $request)
     {
