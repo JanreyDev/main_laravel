@@ -25,6 +25,7 @@
 
         <!-- User Info -->
         <div class="bg-white shadow rounded p-6 mb-8 space-y-2">
+            <p>Login Location: {{ session('location') }}</p>
             <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
             <p><strong>Department:</strong> {{ Auth::user()->department }} ({{ Auth::user()->department_code }})</p>
             <p><strong>Role:</strong> {{ Auth::user()->role }}</p>
