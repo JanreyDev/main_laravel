@@ -20,6 +20,9 @@ class User extends Authenticatable implements JWTSubject
         'department',
         'department_code',
         'role',
+        'failed_attempts',
+        'status',
+        'last_failed_at',
     ];
 
     /**
@@ -49,4 +52,17 @@ class User extends Authenticatable implements JWTSubject
             'department_code' => $this->department_code,
         ];
     }
+
+
+    public function departments()
+    {
+        return $this->belongsToMany(Department::class);
+    }
+
+    protected $casts = [
+        'blocked_until' => 'datetime',
+        'last_failed_at' => 'datetime',
+    ];
+
+
 }

@@ -25,10 +25,22 @@
 
         <!-- User Info -->
         <div class="bg-white shadow rounded p-6 mb-8 space-y-2">
-            <p>Country Name: {{ $location->countryName }}</p> <br />
-            <p>Country Name: {{ $location->countryCode }}</p> <br />
+            @if ($location)
+                <p><strong>Country:</strong> {{ $location->countryName }}</p>
+                <p><strong>Region:</strong> {{ $location->regionName }}</p>
+                <p><strong>City:</strong> {{ $location->cityName }}</p>
+            @else
+                <p><strong>Location:</strong> Unknown</p>
+            @endif
+
+
+
+
             <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
-            <p><strong>Department:</strong> {{ Auth::user()->department }} ({{ Auth::user()->department_code }})</p>
+            <p class="text-gray-700">
+                <strong>Departments:</strong>
+                {{ Auth::user()->departments->pluck('name')->join(', ') }}
+            </p>
             <p><strong>Role:</strong> {{ Auth::user()->role }}</p>
             @if (session('token'))
                 <p class="mt-4"><strong>JWT Token:</strong></p>
@@ -38,8 +50,9 @@
 
         <!-- Cards Section -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
             {{-- PGO Card --}}
-            @if (Auth::user()->department === 'PGO' || Auth::user()->department === 'Special')
+            @if (Auth::user()->departments->contains('name', 'PGO'))
                 <div class="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition">
                     <h3 class="text-xl font-bold text-indigo-600 mb-2">PGO</h3>
                     <p class="text-gray-600">Provincial Governor’s Office</p>
@@ -51,7 +64,7 @@
             @endif
 
             {{-- PPDO Card --}}
-            @if (Auth::user()->department === 'PPDO' || Auth::user()->department === 'Special')
+            @if (Auth::user()->departments->contains('name', 'PPDO'))
                 <div class="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition">
                     <h3 class="text-xl font-bold text-green-600 mb-2">PPDO</h3>
                     <p class="text-gray-600">Provincial Planning and Development Office</p>
@@ -63,7 +76,7 @@
             @endif
 
             {{-- HRM Card --}}
-            @if (Auth::user()->department === 'HRM' || Auth::user()->department === 'Special')
+            @if (Auth::user()->departments->contains('name', 'HRM'))
                 <div class="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition">
                     <h3 class="text-xl font-bold text-pink-600 mb-2">HRM</h3>
                     <p class="text-gray-600">Human Resource Management</p>
@@ -73,7 +86,9 @@
                     </a>
                 </div>
             @endif
+
         </div>
+
 
 
 
