@@ -28,33 +28,43 @@
         </form>
 
         @if (session('error'))
-            <p class="mt-4 text-red-600 text-sm">{{ session('error') }}</p>
-        @endif
+            <div class=" mt-4 text-red-600 text-sm alert alert-danger">
+                {{ session('error') }}
+                @if (session('unlock_time'))
+                    <span id="timer"></span>
+                @endif
+            </div>
 
-        @if (session('unlock_time'))
-            <p id="countdown"></p>
-            <script>
-                const unlockTime = {{ session('unlock_time') }} * 1000; // convert to ms
-                const countdownEl = document.getElementById('countdown');
+            @if (session('unlock_time'))
+                <script>
+                    const unlockTime = {{ session('unlock_time') }} * 1000;
+                    const countdownEl = document.getElementById('timer');
+                    const loginBtn = document.querySelector('button[type="submit"]');
 
-                function updateCountdown() {
-                    const timeLeft = unlockTime - Date.now();
+                    function updateCountdown() {
+                        const now = Date.now();
+                        let diff = Math.floor((unlockTime - now) / 1000);
 
-                    if (timeLeft <= 0) {
-                        countdownEl.textContent = "You can try logging in again now.";
-                        return;
+                        if (diff <= 0) {
+                            countdownEl.innerText = " 0:00";
+                            loginBtn.disabled = false;
+                            return;
+                        }
+
+                        const minutes = Math.floor(diff / 60);
+                        const seconds = diff % 60;
+                        countdownEl.innerText = ` ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                        loginBtn.disabled = true;
                     }
 
-                    const minutes = Math.floor(timeLeft / 1000 / 60);
-                    const seconds = Math.floor((timeLeft / 1000) % 60);
-
-                    countdownEl.textContent = `Try again in ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                }
-
-                setInterval(updateCountdown, 1000);
-                updateCountdown();
-            </script>
+                    updateCountdown();
+                    setInterval(updateCountdown, 1000);
+                </script>
+            @endif
         @endif
+
+
+
     </div>
 </body>
 

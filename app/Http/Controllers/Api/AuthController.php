@@ -41,18 +41,15 @@ class AuthController extends Controller
             return back()->with('error', 'Invalid credentials');
         }
 
-        // 🔒 Check if user is blocked
+        // 🔒 Check if blocked
         if ($user->status === 'blocked') {
-            // If we store blocked_until column, use that
             if ($user->blocked_until && now()->lessThan($user->blocked_until)) {
                 return back()->with([
-                    'error' => 'Your account is blocked.',
+                    'error' => 'Your account is blocked. Please try again in:',
                     'unlock_time' => $user->blocked_until->timestamp
                 ]);
-            }
-
-            // ✅ Auto-unblock if time passed
-            if ($user->blocked_until && now()->greaterThanOrEqualTo($user->blocked_until)) {
+            } else {
+                // ✅ Auto-unblock after time passed
                 $user->status = 'active';
                 $user->failed_attempts = 0;
                 $user->blocked_until = null;
@@ -63,16 +60,25 @@ class AuthController extends Controller
         // 🔑 Check password
         if (!Hash::check($request->password, $user->password)) {
             $user->failed_attempts += 1;
+            $user->last_failed_at = now();
 
             if ($user->failed_attempts >= 3) {
+                // 🚫 Block after 3 wrong attempts
                 $user->status = 'blocked';
-                $user->blocked_until = now()->addMinutes(0.5); // store exact unblock time
+                $user->blocked_until = now()->addMinutes(0.5);
+                $user->save();
+
+                return back()->with([
+                    'error' => 'Your account is blocked. Please try again in:',
+                    'unlock_time' => $user->blocked_until->timestamp
+                ]);
             }
 
-            $user->last_failed_at = now();
             $user->save();
 
-            return back()->with('error', 'Invalid credentials');
+            // ✅ Show remaining attempts
+            $remaining = 3 - $user->failed_attempts;
+            return back()->with('error', "Invalid credentials. You have {$remaining} attempt(s) left.");
         }
 
         // ✅ Successful login
@@ -82,10 +88,11 @@ class AuthController extends Controller
         $user->save();
 
         Auth::login($user);
+
+        // 🔑 Generate JWT token 
         $token = JWTAuth::fromUser($user);
 
-        return redirect()->route('dashboard')->with('token', $token);
-
+        return redirect()->intended(route('dashboard'))->with('token', $token);
     }
 
     public function logout()
