@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\LoginHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,14 +20,13 @@ class AuthController extends Controller
     public function index(Request $request)
     {
         // Example: real client IP
-        // $userIp = $request->ip();
+        $userIp = $request->ip();
+        $location = Location::get($userIp);
 
-        // // Or use a sample IP from Tarlac City
-        // $userIp = '1.37.82.3';
-
-        // $location = Location::get($userIp);
-
-        // return $location;
+        return response()->json([
+            'ip' => $userIp,
+            'location' => $location
+        ]);
     }
 
 
@@ -67,7 +67,7 @@ class AuthController extends Controller
             }
         }
 
-        // 🔑 Check password
+        // 🔐 Check password
         if (!Hash::check($request->password, $user->password)) {
             $user->failed_attempts += 1;
             $user->last_failed_at = now();
@@ -98,7 +98,21 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        // 🔑 Generate JWT token if you still want it in session
+        // 📍 Get user's IP and location
+        $userIp = $request->ip();
+        $location = Location::get($userIp);
+
+        // 📝 Log login history
+        LoginHistory::create([
+            'user_id' => $user->id,
+            'ip_address' => $userIp,
+            'country' => $location->countryName ?? 'Unknown',
+            'city' => $location->cityName ?? 'Unknown',
+            'user_agent' => $request->userAgent(),
+            'logged_in_at' => now(),
+        ]);
+
+        // 🔑 Generate JWT token
         $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
 
         return redirect()->intended(route('dashboard'))->with('token', $token);
@@ -109,6 +123,7 @@ class AuthController extends Controller
         Auth::logout();
         return redirect('/')->with('success', 'Logged out successfully');
     }
+
     public function register(Request $request)
     {
         try {
@@ -156,4 +171,3 @@ class AuthController extends Controller
         ], 201);
     }
 }
-
