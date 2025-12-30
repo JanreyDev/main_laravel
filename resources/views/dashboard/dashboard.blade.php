@@ -11,12 +11,20 @@
     <!-- Navbar -->
     <nav class="bg-indigo-600 p-4 text-white flex justify-between items-center">
         <h1 class="text-xl font-bold">Dashboard</h1>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="bg-red-500 px-3 py-1 rounded hover:bg-red-600">
-                Logout
-            </button>
-        </form>
+        <div class="flex gap-4 items-center">
+            @if (Auth::user()->role === 'admin')
+                <a href="{{ route('admin.password-reset.index') }}"
+                    class="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600">
+                    Admin Panel
+                </a>
+            @endif
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="bg-red-500 px-3 py-1 rounded hover:bg-red-600">
+                    Logout
+                </button>
+            </form>
+        </div>
     </nav>
 
     <!-- Content -->
@@ -72,7 +80,12 @@
                 <strong>Departments:</strong>
                 {{ Auth::user()->departments->pluck('name')->join(', ') }}
             </p>
-            <p><strong>Role:</strong> {{ Auth::user()->role }}</p>
+            <p><strong>Role:</strong>
+                <span
+                    class="px-2 py-1 rounded text-sm {{ Auth::user()->role === 'admin' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800' }}">
+                    {{ ucfirst(Auth::user()->role) }}
+                </span>
+            </p>
 
             @if (session('token'))
                 <p class="mt-4"><strong>JWT Token:</strong></p>

@@ -22,13 +22,21 @@
                 <input type="password" name="password" required
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
             </div>
+
+            <!-- Forgot Password Link -->
+            <div class="text-right">
+                <a href="{{ route('forgot-password') }}" class="text-sm text-indigo-600 hover:text-indigo-800">
+                    Forgot Password?
+                </a>
+            </div>
+
             <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">
                 Login
             </button>
         </form>
 
         @if (session('error'))
-            <div class=" mt-4 text-red-600 text-sm alert alert-danger">
+            <div class="mt-4 text-red-600 text-sm alert alert-danger">
                 {{ session('error') }}
                 @if (session('unlock_time'))
                     <span id="timer"></span>
@@ -63,8 +71,11 @@
             @endif
         @endif
 
-
-
+        @if (session('success'))
+            <div class="mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
     </div>
 </body>
 
